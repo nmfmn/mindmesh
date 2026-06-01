@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindMesh</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header>
+      <h1>🧠 MindMesh</h1>
+      <nav>
+        <button class="tab active" data-tab="research">🔍 研究</button>
+        <button class="tab" data-tab="reading">📖 阅读</button>
+        <button class="tab" data-tab="bookmarks">⭐ 收藏</button>
+        <button class="tab" data-tab="graph">🕸️ 图谱</button>
+        <button class="tab" data-tab="settings">⚙️ 设置</button>
+      </nav>
+    </header>
+
+    <!-- Research Panel -->
+    <section id="panel-research" class="panel active">
+      <div class="search-box">
+        <textarea id="research-query" placeholder="输入研究课题，AI 会分解、搜索、对比观点并生成引用报告..." rows="3"></textarea>
+        <div class="toolbar">
+          <button id="research-btn" class="btn primary">开始研究</button>
+          <button id="serendipity-btn" class="btn">💡 偶然发现</button>
+        </div>
+      </div>
+      <div id="serendipity-result" class="result"></div>
+      <div id="research-result" class="result"></div>
+      <div id="research-history" class="history-list"></div>
+    </section>
+
+    <!-- Reading Panel -->
+    <section id="panel-reading" class="panel">
+      <div class="toolbar">
+        <button id="digest-btn" class="btn">📋 生成今日文摘</button>
+        <button id="last-digest-btn" class="btn">📄 最近文摘</button>
+        <button id="refresh-reading-btn" class="btn">🔄 刷新</button>
+      </div>
+      <div id="digest-result" class="result"></div>
+      <div id="reading-list" class="history-list"></div>
+    </section>
+
+    <!-- Bookmarks Panel -->
+    <section id="panel-bookmarks" class="panel">
+      <div class="toolbar">
+        <button id="save-page-btn" class="btn primary">⭐ 收藏当前页面</button>
+        <button id="export-bookmarks-btn" class="btn">📤 导出</button>
+        <button id="refresh-bookmarks-btn" class="btn">🔄 刷新</button>
+      </div>
+      <div class="setting-group">
+        <input type="text" id="bookmark-search" placeholder="搜索收藏（标题、标签、URL、内容）..." style="margin-bottom:12px;">
+      </div>
+      <div id="bookmark-stats" class="hint" style="margin-bottom:12px;"></div>
+      <div id="bookmark-list" class="history-list"></div>
+    </section>
+
+    <!-- Knowledge Graph Panel -->
+    <section id="panel-graph" class="panel">
+      <div class="toolbar">
+        <button id="extract-all-btn" class="btn primary">🧠 批量提取概念</button>
+        <button id="refresh-graph-btn" class="btn">🔄 刷新</button>
+      </div>
+      <div class="setting-group">
+        <input type="text" id="graph-search" placeholder="搜索概念..." style="margin-bottom:12px;">
+      </div>
+      <div id="graph-stats" class="hint" style="margin-bottom:12px;"></div>
+      <div id="graph-list" class="history-list"></div>
+    </section>
+
+    <!-- Settings Panel -->
+    <section id="panel-settings" class="panel">
+      <div class="setting-group">
+        <label>API Key</label>
+        <input type="password" id="setting-apikey" placeholder="sk-...">
+        <span class="hint">支持 OpenAI 兼容 API</span>
+      </div>
+      <div class="setting-group">
+        <label>API URL</label>
+        <input type="text" id="setting-apiurl" placeholder="https://api.openai.com/v1">
+        <span class="hint">默认 OpenAI，可改 DeepSeek/硅基流动等</span>
+      </div>
+      <div class="setting-group">
+        <label>模型</label>
+        <input type="text" id="setting-model" placeholder="gpt-4o-mini">
+      </div>
+      <button id="save-settings-btn" class="btn primary">保存设置</button>
+      <button id="test-api-btn" class="btn">🔗 测试连接</button>
+      <hr>
+      <div class="setting-group">
+        <label>☁️ 云同步</label>
+        <div id="sync-status" class="sync-status">
+          <span id="sync-status-text">未连接</span>
+          <span id="sync-last-time" class="hint"></span>
+        </div>
+        <div class="sync-buttons">
+          <button id="sync-connect-btn" class="btn primary">连接 Google Drive</button>
+          <button id="sync-disconnect-btn" class="btn danger" style="display:none;">断开连接</button>
+          <button id="sync-now-btn" class="btn" style="display:none;">立即同步</button>
+        </div>
+      </div>
+      <hr>
+      <button id="clear-data-btn" class="btn danger">清除所有数据</button>
+    </section>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="lib/storage.js"></script>
+  <script src="sidepanel.js"></script>
+</body>
+</html>
