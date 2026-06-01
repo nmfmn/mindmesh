@@ -8,121 +8,11 @@ document.querySelectorAll('.tab').forEach(tab => {
     tab.classList.add('active');
     document.getElementById(`panel-${tab.dataset.tab}`).classList.add('active');
     if (tab.dataset.tab === 'reading') loadReading();
-    if (tab.dataset.tab === 'research') loadResearchHistory();
     if (tab.dataset.tab === 'bookmarks') loadBookmarks();
     if (tab.dataset.tab === 'graph') loadGraph();
     if (tab.dataset.tab === 'settings') { loadSettings(); loadSyncStatus(); }
   });
 });
-
-// --- Research ---
-document.getElementById('research-btn').addEventListener('click', async () => {
-  const query = document.getElementById('research-query').value.trim();
-  if (!query) return toast('请输入研究课题', 'error');
-
-  const btn = document.getElementById('research-btn');
-  const resultEl = document.getElementById('research-result');
-  btn.disabled = true;
-  btn.textContent = '研究中...';
-  resultEl.classList.add('visible', 'loading');
-  resultEl.textContent = '正在分解课题、搜索资料、综合分析...';
-
-  try {
-    const res = await chrome.runtime.sendMessage({ action: 'research', query });
-    if (res.error) throw new Error(res.error);
-    resultEl.classList.remove('loading');
-    resultEl.innerHTML = markdownToHtml(res.report);
-    document.getElementById('research-query').value = '';
-    loadResearchHistory();
-  } catch (e) {
-    resultEl.textContent = '研究失败: ' + e.message;
-    resultEl.classList.remove('loading');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '开始研究';
-  }
-});
-
-// --- Serendipity ---
-document.getElementById('serendipity-btn').addEventListener('click', async () => {
-  const query = document.getElementById('research-query').value.trim();
-  if (!query) return toast('请输入课题再点击偶然发现', 'error');
-
-  const btn = document.getElementById('serendipity-btn');
-  const resultEl = document.getElementById('serendipity-result');
-  btn.disabled = true;
-  btn.textContent = '搜索中...';
-  resultEl.classList.add('visible', 'loading');
-  resultEl.textContent = '正在从历史阅读中寻找相关内容...';
-
-  try {
-    const res = await chrome.runtime.sendMessage({ action: 'serendipity', query });
-    if (res.error) throw new Error(res.error);
-    resultEl.classList.remove('loading');
-
-    if (!res.results || res.results.length === 0) {
-      resultEl.innerHTML = '<div style="color:var(--text2);">暂未找到相关历史阅读，多读一些页面后再试</div>';
-    } else {
-      resultEl.innerHTML = `<div style="margin-bottom:8px;color:var(--accent);">💡 找到 ${res.results.length} 篇相关阅读：</div>` +
-        res.results.map(r => `
-          <div class="history-item" onclick="window.open('${escapeHtml(r.url)}')">
-            <div class="title">${escapeHtml(r.title)}</div>
-            <div class="meta">
-              <span class="domain">${escapeHtml(r.domain)}</span>
-              <span style="color:var(--green);">${escapeHtml(r.reason)}</span>
-            </div>
-          </div>
-        `).join('');
-    }
-  } catch (e) {
-    resultEl.textContent = '搜索失败: ' + e.message;
-    resultEl.classList.remove('loading');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '💡 偶然发现';
-  }
-});
-
-async function loadResearchHistory() {
-  const res = await chrome.runtime.sendMessage({ action: 'getResearch', options: { limit: 20 } });
-  const el = document.getElementById('research-history');
-  if (!res || res.length === 0) {
-    el.innerHTML = '<div style="color:var(--text2);padding:16px;">暂无研究记录</div>';
-    return;
-  }
-  el.innerHTML = res.map(r => `
-    <div class="history-item" data-id="${r.id}">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div class="title" style="flex:1;">${escapeHtml(r.query)}</div>
-        <button class="btn-icon delete-research" data-id="${r.id}" title="删除">✕</button>
-      </div>
-      <div class="meta">${new Date(r.createdAt).toLocaleString()}</div>
-    </div>
-  `).join('');
-
-  // Delete buttons
-  el.querySelectorAll('.delete-research').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      const id = parseInt(btn.dataset.id);
-      await chrome.runtime.sendMessage({ action: 'deleteResearch', id });
-      loadResearchHistory();
-      toast('已删除', 'success');
-    });
-  });
-
-  el.querySelectorAll('.history-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const r = res.find(x => x.id === parseInt(item.dataset.id));
-      if (r) {
-        const resultEl = document.getElementById('research-result');
-        resultEl.classList.add('visible');
-        resultEl.classList.remove('loading');
-        resultEl.innerHTML = markdownToHtml(r.report);
-      }
-    });
-  });
-}
 
 // --- Reading ---
 document.getElementById('digest-btn').addEventListener('click', async () => {
@@ -321,7 +211,6 @@ document.getElementById('clear-data-btn').addEventListener('click', async () => 
   await chrome.runtime.sendMessage({ action: 'clearData' });
   toast('数据已清除', 'success');
   loadReading();
-  loadResearchHistory();
 });
 
 async function loadSettings() {
