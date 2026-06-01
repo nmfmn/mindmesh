@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "MindMesh",
+  "version": "0.1.0",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxIU9bvMyLqrS8AvVHRu+KZwj5M7XCnP07lXg1fiC6Af/+x4ExZhRq3wPRMzku3qpmGmX3eKLWyLP0TbGHKP2XXX8gqjERTn/uvpK85nh9OAYzzlFBvdzhCLq6LurOzOlTeXQP8X7a3H4dv1qqob6KLv9ZctId6t0GnepucRo/NOGW6nYJOERCW8kit621blRIzjrXZRbG4oUj7jQTeWG5/iDZoCDF56v6M9RxMbOH1dfcOZD0krD8vmlQdrSdE7r2GhE+KqZTHZ6d9B0OvPSEC3HTxXMbF/jc+8KFOfQeg+Gsmeb55z5lic3vF0hpJl6lRU9dkHkN5mcPiFPwMZq6QIDAQAB",
+  "description": "AI 研究助手 — 追踪你的阅读并帮你做研究",
+  "permissions": ["storage", "sidePanel", "activeTab", "tabs", "alarms", "identity"],
+  "oauth2": {
+    "client_id": "860907233537-lk4e7p31da87s8qo27g81ko0tpheddo0.apps.googleusercontent.com",
+    "scopes": ["https://www.googleapis.com/auth/drive.file"]
+  },
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["content.js"],
+    "run_at": "document_idle"
+  }],
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "action": {
+    "default_title": "MindMesh — 打开研究面板"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
