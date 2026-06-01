@@ -293,11 +293,14 @@ document.getElementById('sync-now-btn').addEventListener('click', async () => {
   }
 });
 
+// Current category filter state
+let currentCategory = '';
+
 // --- Bookmarks ---
 async function loadBookmarks(options = {}) {
   const bookmarks = await chrome.runtime.sendMessage({
     action: 'getBookmarks',
-    options: { search: options.search || '', limit: 100 }
+    options: { search: options.search || '', category: options.category || currentCategory, limit: 200 }
   });
 
   const el = document.getElementById('bookmark-list');
@@ -313,6 +316,7 @@ async function loadBookmarks(options = {}) {
 
   el.innerHTML = bookmarks.map(bm => {
     const tags = (bm.tags || []).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('');
+    const catBadge = bm.category && bm.category !== '其他' ? `<span class="cat-badge">${escapeHtml(bm.category)}</span>` : '';
     return `
     <div class="history-item bookmark-item">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;">
@@ -324,7 +328,7 @@ async function loadBookmarks(options = {}) {
         <span class="domain">${escapeHtml(bm.domain)}</span>
         <span>${new Date(bm.savedAt).toLocaleDateString()}</span>
       </div>
-      ${tags ? `<div class="tags">${tags}</div>` : ''}
+      ${catBadge || tags ? `<div class="tags">${catBadge}${tags}</div>` : ''}
     </div>
   `}).join('');
 
@@ -399,6 +403,16 @@ document.getElementById('bookmark-search').addEventListener('input', (e) => {
   bookmarkSearchTimer = setTimeout(() => {
     loadBookmarks({ search: e.target.value.trim() });
   }, 300);
+});
+
+// Category filter pills
+document.querySelectorAll('.cat-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    currentCategory = pill.dataset.cat;
+    loadBookmarks({ category: currentCategory, search: document.getElementById('bookmark-search').value.trim() });
+  });
 });
 
 // --- Knowledge Graph ---
