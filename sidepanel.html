@@ -12,30 +12,15 @@
     <header>
       <h1>🧠 MindMesh</h1>
       <nav>
-        <button class="tab active" data-tab="research">🔍 研究</button>
-        <button class="tab" data-tab="reading">📖 阅读</button>
+        <button class="tab active" data-tab="reading">📖 阅读</button>
         <button class="tab" data-tab="bookmarks">⭐ 收藏</button>
         <button class="tab" data-tab="graph">🕸️ 图谱</button>
         <button class="tab" data-tab="settings">⚙️ 设置</button>
       </nav>
     </header>
 
-    <!-- Research Panel -->
-    <section id="panel-research" class="panel active">
-      <div class="search-box">
-        <textarea id="research-query" placeholder="输入研究课题，AI 会分解、搜索、对比观点并生成引用报告..." rows="3"></textarea>
-        <div class="toolbar">
-          <button id="research-btn" class="btn primary">开始研究</button>
-          <button id="serendipity-btn" class="btn">💡 偶然发现</button>
-        </div>
-      </div>
-      <div id="serendipity-result" class="result"></div>
-      <div id="research-result" class="result"></div>
-      <div id="research-history" class="history-list"></div>
-    </section>
-
     <!-- Reading Panel -->
-    <section id="panel-reading" class="panel">
+    <section id="panel-reading" class="panel active">
       <div class="toolbar">
         <button id="digest-btn" class="btn">📋 生成今日文摘</button>
         <button id="last-digest-btn" class="btn">📄 最近文摘</button>
