@@ -233,15 +233,19 @@ async function saveBookmark(data) {
 
     // Extract tags in background
     if (data.contentText && data.contentText.length > 200) {
-      AI.extractTags(data.contentText, { title: data.title, domain: data.domain }).then(async (tags) => {
-        if (tags && tags.length > 0) {
+      AI.extractTagsAndCategory(data.contentText, { title: data.title, domain: data.domain }).then(async (result) => {
+        if (result && (result.tags.length > 0 || result.category !== '其他')) {
           const db = await openDB();
           const tx = db.transaction('bookmarks', 'readwrite');
           const store = tx.objectStore('bookmarks');
           const getReq = store.get(id);
           getReq.onsuccess = () => {
             const record = getReq.result;
-            if (record) { record.tags = tags; store.put(record); }
+            if (record) {
+              record.tags = result.tags;
+              record.category = result.category;
+              store.put(record);
+            }
           };
         }
       }).catch(() => {});
@@ -284,9 +288,8 @@ async function saveCurrentPage() {
 
     // Extract tags in background (don't await)
     if (contentText.length > 200) {
-      AI.extractTags(contentText, { title: tab.title, domain }).then(async (tags) => {
-        if (tags && tags.length > 0) {
-          // Update bookmark with tags
+      AI.extractTagsAndCategory(contentText, { title: tab.title, domain }).then(async (result) => {
+        if (result && (result.tags.length > 0 || result.category !== '其他')) {
           const db = await openDB();
           const tx = db.transaction('bookmarks', 'readwrite');
           const store = tx.objectStore('bookmarks');
@@ -294,7 +297,8 @@ async function saveCurrentPage() {
           getReq.onsuccess = () => {
             const record = getReq.result;
             if (record) {
-              record.tags = tags;
+              record.tags = result.tags;
+              record.category = result.category;
               store.put(record);
             }
           };
