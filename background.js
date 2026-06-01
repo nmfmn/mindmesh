@@ -15,17 +15,11 @@ async function handleMessage(msg, sender) {
     case 'getVisits':
       return Storage.getVisits(msg.options || {});
 
-    case 'getResearch':
-      return Storage.getResearch(msg.options || {});
-
     case 'summarize':
       return summarize(msg.data);
 
     case 'dailyDigest':
       return dailyDigest();
-
-    case 'research':
-      return research(msg.query);
 
     case 'getSetting':
       return Storage.getSetting(msg.key);
@@ -36,10 +30,6 @@ async function handleMessage(msg, sender) {
 
     case 'clearData':
       await Storage.clearAll();
-      return { ok: true };
-
-    case 'deleteResearch':
-      await Storage.deleteResearch(msg.id);
       return { ok: true };
 
     // --- Knowledge Graph ---
@@ -78,6 +68,7 @@ async function handleMessage(msg, sender) {
       return { ok: true };
 
     // --- Sync actions ---
+    // --- Sync ---
     case 'syncConnect':
       return syncConnect();
 
@@ -154,16 +145,6 @@ async function dailyDigest() {
     if (visits.length === 0) return { digest: '今天还没有阅读记录。' };
     const digest = await AI.dailyDigest(visits);
     return { digest };
-  } catch (e) {
-    return { error: e.message };
-  }
-}
-
-async function research(query) {
-  try {
-    const report = await AI.researchAgent(query);
-    await Storage.saveResearch({ query, report });
-    return { report };
   } catch (e) {
     return { error: e.message };
   }
@@ -401,15 +382,13 @@ async function syncPull() {
 // Collect all local data for upload
 async function _collectLocalData() {
   const visits = await Storage.getVisits({});
-  const researchList = await Storage.getResearch({});
   const concepts = await Storage.getConcepts({});
   const relations = await Storage.getRelations({});
   const bookmarks = await Storage.getBookmarks({});
   return {
-    version: 2,
+    version: 3,
     exportedAt: Date.now(),
     visits,
-    research: researchList,
     concepts,
     relations,
     bookmarks
@@ -433,21 +412,7 @@ async function _mergeRemoteData(remote) {
     }
   }
 
-  // Merge research (skip duplicates by query+createdAt)
-  if (remote.research) {
-    const localResearch = await Storage.getResearch({});
-    const localResearchKeys = new Set(
-      localResearch.map(r => r.query + '|' + r.createdAt)
-    );
-    for (const item of remote.research) {
-      const key = item.query + '|' + item.createdAt;
-      if (!localResearchKeys.has(key)) {
-        await Storage.saveResearch(item);
-      }
-    }
-  }
-
-  // Merge concepts (skip duplicates by name+visitUrl+extractedAt)
+  // Merge concepts
   if (remote.concepts && remote.concepts.length > 0) {
     const localConcepts = await Storage.getConcepts({});
     const localConceptKeys = new Set();
